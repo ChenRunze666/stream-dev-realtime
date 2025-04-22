@@ -1,0 +1,22 @@
+{
+  "common": {
+    "ar": "17",
+    "uid": "320",
+    "os": "Android 13.0",
+    "ch": "oppo",
+    "is_new": "0",
+    "md": "Redmi k50",
+    "mid": "mid_202",
+    "vc": "v2.1.134",
+    "ba": "Redmi",
+    "sid": "ad8aa5e8-9956-415b-ad09-03e32d091631"
+  },
+  "page": {
+    "page_id": "payment",
+    "item": "1294",
+    "during_time": 5226,
+    "item_type": "order_id",
+    "last_page_id": "order"
+  },
+  "ts": 1744718674000
+}
