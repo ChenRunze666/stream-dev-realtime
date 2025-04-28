@@ -15,8 +15,7 @@ import org.apache.flink.table.api.bridge.java.StreamTableEnvironment;
 public class DwdTradeOrderPaySucDetail extends BaseSQLApp {
 
     public static void main(String[] args) {
-        new DwdTradeOrderPaySucDetail().start(10016, 4, Constant.TOPIC_DWD_TRADE_ORDER_PAYMENT_SUCCESS
-        );
+        new DwdTradeOrderPaySucDetail().start(10016, 4, Constant.TOPIC_DWD_TRADE_ORDER_PAYMENT_SUCCESS);
 
     }
 
@@ -46,6 +45,7 @@ public class DwdTradeOrderPaySucDetail extends BaseSQLApp {
                         "watermark for et as et - interval '3' second " +
                         ")" + SQLUtil.getKafkaDDL(Constant.TOPIC_DWD_TRADE_ORDER_DETAIL,Constant.TOPIC_DWD_TRADE_ORDER_PAYMENT_SUCCESS));
 
+        tEnv.sqlQuery("select * from dwd_trade_order_detail").execute().print();
         //TODO 从topic_db主题中读取数据  创建动态表
         readOdsDb(tEnv,Constant.TOPIC_DWD_TRADE_ORDER_PAYMENT_SUCCESS);
         //TODO 过滤出支付成功数据
@@ -65,7 +65,7 @@ public class DwdTradeOrderPaySucDetail extends BaseSQLApp {
         tEnv.createTemporaryView("payment_info", paymentInfo);
 
         //TODO 从HBase中读取字典数据 创建动态表
-        readBaseDic(tEnv);
+//        readBaseDic(tEnv);
         //TODO 和字典进行关联---lookup join 和下单数据进行关联---IntervalJoin
         Table result = tEnv.sqlQuery(
                 "select " +
@@ -118,7 +118,7 @@ public class DwdTradeOrderPaySucDetail extends BaseSQLApp {
                 "PRIMARY KEY (order_detail_id) NOT ENFORCED " +
                 ")" + SQLUtil.getUpsertKafkaDDL(Constant.TOPIC_DWD_TRADE_ORDER_PAYMENT_SUCCESS));
 //        result.execute().print();
-        result.executeInsert(Constant.TOPIC_DWD_TRADE_ORDER_PAYMENT_SUCCESS);
+//        result.executeInsert(Constant.TOPIC_DWD_TRADE_ORDER_PAYMENT_SUCCESS);
 
     }
 }

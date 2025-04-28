@@ -29,6 +29,7 @@ public class TableProcessFunction extends BroadcastProcessFunction<JSONObject, T
         this.mapStateDescriptor = mapStateDescriptor;
     }
 
+//    将配置信息预加载到程序中，避免主流数据先到，广播流数据后到，丢失数据的情况
     @Override
     public void open(Configuration parameters) throws Exception {
         //将配置表中的配置信息预加载到configMap中

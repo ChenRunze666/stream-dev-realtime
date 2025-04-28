@@ -19,4 +19,6 @@ public interface TrafficStatsMapper {
     @Select("select ch,sum(uv_ct) uv_ct from dws_traffic_vc_ch_ar_is_new_page_view_window partition par#{date} " +
             "group by ch order by uv_ct desc limit #{limit}")
     List<TrafficUvCt> selectChUvCt(@Param("date") Integer date, @Param("limit") Integer limit);
+    //获取某天各个品牌交易数量
+    //select trademark_name,count(*) num from dws_trade_sku_order_window partition par${date} group by trademark_name
 }
