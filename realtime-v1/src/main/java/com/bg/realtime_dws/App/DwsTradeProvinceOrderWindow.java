@@ -49,9 +49,6 @@ public class DwsTradeProvinceOrderWindow extends BaseApp {
                         Constant.TOPIC_DWD_TRADE_ORDER_DETAIL);
     }
 
-    public DwsTradeProvinceOrderWindow() {
-    }
-
     @Override
     public void handle(StreamExecutionEnvironment env, DataStreamSource<String> kafkaStrDS) {
         //TODO 1.过滤空消息  并对流中数据进行类型转换    jsonStr->jsonObj
@@ -142,35 +139,41 @@ public class DwsTradeProvinceOrderWindow extends BaseApp {
                 }
         );
 //        beanDS.print();
-//        //TODO 6.分组
+        //TODO 6.分组
         KeyedStream<TradeProvinceOrderBean, String> provinceIdKeyedDS = beanDS.keyBy(TradeProvinceOrderBean::getProvinceId);
 //        provinceIdKeyedDS.print("key->");
 //        2> TradeProvinceOrderBean(stt=null, edt=null, curDate=null, provinceId=1, provinceName=, orderCount=null, orderAmount=-6029.10, ts=null, orderIdSet=[1716])
 
-//        //TODO 7.开窗
+        //TODO 7.开窗
         WindowedStream<TradeProvinceOrderBean, String, TimeWindow> windowDS = provinceIdKeyedDS.window(TumblingEventTimeWindows.of(org.apache.flink.streaming.api.windowing.time.Time.seconds(1)));
-//
-//        //TODO 8.聚合
+
+        //TODO 8.聚合
         SingleOutputStreamOperator<TradeProvinceOrderBean> reduceDS = windowDS.reduce(
-                (ReduceFunction<TradeProvinceOrderBean>) (value1, value2) -> {
-                    value1.setOrderAmount(value1.getOrderAmount().add(value2.getOrderAmount()));
-                    value1.getOrderIdSet().addAll(value2.getOrderIdSet());
-                    return value1;
+                new ReduceFunction<TradeProvinceOrderBean>() {
+                    @Override
+                    public TradeProvinceOrderBean reduce(TradeProvinceOrderBean value1, TradeProvinceOrderBean value2) throws Exception {
+                        value1.setOrderAmount(value1.getOrderAmount().add(value2.getOrderAmount()));
+                        value1.getOrderIdSet().addAll(value2.getOrderIdSet());
+                        return value1;
+                    }
                 },
-                (WindowFunction<TradeProvinceOrderBean, TradeProvinceOrderBean, String, TimeWindow>) (s, window, input, out) -> {
-                    TradeProvinceOrderBean orderBean = input.iterator().next();
-                    String stt = DateFormatUtil.tsToDateTime(window.getStart());
-                    String edt = DateFormatUtil.tsToDateTime(window.getEnd());
-                    String curDate = DateFormatUtil.tsToDate(window.getStart());
-                    orderBean.setStt(stt);
-                    orderBean.setEdt(edt);
-                    orderBean.setCurDate(curDate);
-                    orderBean.setOrderCount((long) orderBean.getOrderIdSet().size());
-                    out.collect(orderBean);
+                new WindowFunction<TradeProvinceOrderBean, TradeProvinceOrderBean, String, TimeWindow>() {
+                    @Override
+                    public void apply(String s, TimeWindow window, Iterable<TradeProvinceOrderBean> input, Collector<TradeProvinceOrderBean> out) throws Exception {
+                        TradeProvinceOrderBean orderBean = input.iterator().next();
+                        String stt = DateFormatUtil.tsToDateTime(window.getStart());
+                        String edt = DateFormatUtil.tsToDateTime(window.getEnd());
+                        String curDate = DateFormatUtil.tsToDate(window.getStart());
+                        orderBean.setStt(stt);
+                        orderBean.setEdt(edt);
+                        orderBean.setCurDate(curDate);
+                        orderBean.setOrderCount((long) orderBean.getOrderIdSet().size());
+                        out.collect(orderBean);
+                    }
                 }
         );
 
-//        reduceDS.print();
+//        reduceDS.print("reduce-->");
 //        1> TradeProvinceOrderBean(stt=2025-04-13 22:28:30, edt=2025-04-13 22:28:40, curDate=2025-04-13, provinceId=33, provinceName=, orderCount=76, orderAmount=153193.50, ts=null, orderIdSet=[89, 1583, 151, 1932, 154, 1216, 1930, 156, 1851, 996, 118, 955, 51, 1735, 54, 55, 57, 1908, 18, 1470, 1074, 162, 1745, 1149, 1666, 168, 763, 1587, 169, 1223, 1586, 1222, 966, 1906, 1707, 1946, 1901, 1080, 66, 23, 29, 130, 1679, 1831, 134, 1874, 179, 1278, 1870, 139, 72, 74, 1516, 34, 38, 39, 1693, 1646, 1921, 143, 1128, 1721, 1446, 1523, 1841, 102, 1245, 2015, 1200, 989, 83, 1968, 949, 1802, 1406, 42])
 
 //        //TODO 9.关联省份维度
@@ -199,7 +202,7 @@ public class DwsTradeProvinceOrderWindow extends BaseApp {
         });
 
 
-        SingleOutputStreamOperator<TradeProvinceOrderBean> filter = map.filter(o -> o.getCurDate().equals("2025-04-18"));
+        SingleOutputStreamOperator<TradeProvinceOrderBean> filter = map.filter(o -> o.getCurDate().equals("2025-04-28"));
         //TODO 10.将关联的结果写到Doris中
         SingleOutputStreamOperator<String> map1 = filter
                 .map(new BeanToJsonStrMapFunction<>());

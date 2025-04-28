@@ -177,7 +177,7 @@ public class DimApp extends BaseApp {
 
 
         //TODO 6.引配置流中的数据类型进行转换 json->实体类对象
-        //      TableProcessDim(sourceTable=base_category3, sinkTable=dim_base_category3, sinkColumns=id,name,category2_id, sinkFamily=info, sinkRowKey=id, op=r)
+        //TableProcessDim(sourceTable=base_category3, sinkTable=dim_base_category3, sinkColumns=id,name,category2_id, sinkFamily=info, sinkRowKey=id, op=r)
 //        tpDS.print();
         return mySQLSource.map((MapFunction<String, TableProcessDim>) s -> {
             JSONObject object = JSON.parseObject(s);

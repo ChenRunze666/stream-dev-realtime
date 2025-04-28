@@ -1,4 +1,4 @@
-package com.test;
+package com.bg.realtime_dim.App;
 
 import com.ververica.cdc.connectors.mysql.source.MySqlSource;
 import com.ververica.cdc.connectors.mysql.table.StartupOptions;
@@ -14,7 +14,7 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 import java.util.Properties;
 
 /**
- * @Package com.test.FlinkCDC
+ * @Package com.bg.realtime_dim.App.FlinkCDC
  * @Author Chen.Run.ze
  * @Date 2025/4/7 19:31
  * @description: Flink CDC
